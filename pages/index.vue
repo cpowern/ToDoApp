@@ -18,7 +18,8 @@
     <div class="bg-gray-200 p-4 rounded-lg" v-if="state.todos.length >= 1"> 
       <ul v-for="todo in state.todos" :key="todo" class="py-2">
         <!-- Array wird ausgegeben -->
-      <li class="flex justify-between">{{ todo }} <img class="inline-block cursor-pointer" src="/icons/deleteIcon.svg" alt="Delete"></li>
+      <li class="flex justify-between mb-5 px-5">{{ todo }}<img class="inline-block cursor-pointer" src="/icons/deleteIcon.svg" alt="Delete" @click.prevent="deleteTodo(todo)"/>
+    </li>
     </ul>
     </div>
     <div v-else>
@@ -26,6 +27,8 @@
     </div>
   </div>
 </template>
+
+
 <script setup lang="ts">
 definePageMeta({
   layout: 'default'
@@ -33,10 +36,17 @@ definePageMeta({
 
 const state: { [key: string]: any } = reactive({
   input: '',
-  todos: []
+  todos: [],
 })
 
 function addTodo(): void {
   state.todos.push(state.input)
 }
+function deleteTodo(todo: string): void {
+  const index = state.todos.indexOf(todo);
+  state.todos.splice(index, 1);
+}
+
+
 </script>
+
