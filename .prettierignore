@@ -1,0 +1,5 @@
+# Ignore artifacts:
+.nuxt
+node_modules
+build
+coverage

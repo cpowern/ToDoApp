@@ -5,5 +5,5 @@ export default <Partial<Config>>{
   darkMode: 'class',
   theme: {},
   plugins: [],
-  content: []
+  content: [],
 }
