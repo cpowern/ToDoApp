@@ -1,5 +1,5 @@
-<template class="bg-danger">
-  <div class="m-4 text-center">
+<template>
+  <div class="text-center bg-gray-600 p-4 w-full">
     <div class="py-2 mb-6 w-full mx-8 flex items-center">
       <img class="mx-0 mb-2" src="/icons/taskIcon.svg" alt="task" width="30" />
       <!-- Zentrieren und Schriftgröße erhöhen -->
@@ -10,48 +10,42 @@
     <AddTaskCard @add-todo="addTodo"/>
     <!-- Überschrift -->
     <h2
-      class="mr-2 mt-4 mb-16 text-2xl font-bold text-center text-GREY-700 inline-block"
+      class="mr-2 mt-4 mb-16 text-2xl font-bold text-center text-lime-500
+       inline-block"
       placeholder="Schreibe hier deine Notiz..."
     >
-      <img src="/icons/filesIcon.svg" alt="files" class="inline-block" />
+      <img src="/icons/coloredFiles.svg" alt="files" class="inline-block" />
       Geplant
     </h2>
     <!-- Array für die Checkliste -->
-    <div v-if="todos.length >= 1" class="text-2xl bg-gray-100 p-4 rounded-lg">
-      <ul v-for="todo in todos" :key="todo.title" class="mb-4 py-2">
+    <div v-if="todos.length >= 1" class="text-2xl bg-gray-600 p-4 rounded-lg text-justify">
+      <ul v-for="todo in todos" :key="todo.title" class="mb-4 py-2 bg-gray-500 p-4 rounded-lg text-justify font-bold text-lime-500">
         <!-- Array wird ausgegeben -->
-        <li class="flex justify-between mb-5 px-5">
+        <li class="flex justify-between mb-2 px-4">
           {{ todo.title }}
           <img
-            class="mr-12 inline-block cursor-pointer"
-            src="/icons/dateIcon.svg"
-            alt="Date"
-            @click.prevent="setDate(todo)"
-          />
-
-          <img
-            class="inline-block cursor-pointer"
+            class="inline-block cursor-pointer items-center"
             src="/icons/deleteIcon.svg"
             alt="Delete"
             @click.prevent="deleteTodo(todo)"
           />
         </li>
-        <textarea
+<!--         <textarea
           id="demo"
           v-model="todo.note"
           placeholder="Schreibe hier deine Notiz..."
           class="p-2 border rounded-md focus:ring focus:ring-lime-500 focus:outline-none mb-2"
           style="width: 100%"
-        ></textarea>
+        ></textarea> -->
         <!--         <img src="/icons/repeatIcon.svg" alt="repeat" class="cursor-pointer" /> -->
-        <button
+<!--         <button
           v-if="!todo.buttonClicked && !todo.noteVisible"
           class="bg-lime-500 text-white py-2 px-4 rounded-md hover:bg-lime-600 transition duration-300 ease-in-out"
           type="button"
           @click="showNoteInput(todo)"
         >
           Notiz speichern
-        </button>
+        </button> -->
         <div v-if="todo.todoDate">
           <!--Bei mir kam das herraus: Fällig am: Thu Sep 21 2023 02:00:00 GMT+0200 (Mitteleuropäische Sommerzeit)-->
           <!--Chatgpt hat mir gesagt wenn ich: toLocaleDateString noch hinzufüge, verschwindet das!-->
@@ -141,7 +135,7 @@ function sortDate(todos: ToDo[]): void {
 } */
 </script>
 
-<style>
+<!-- <style>
 .input-container {
   display: flex;
   align-items: center; /* Zentriert die Elemente vertikal */
@@ -152,4 +146,4 @@ function sortDate(todos: ToDo[]): void {
   /* Stilen Sie Ihr SVG-Icon hier nach Bedarf */
   /* z.B., ändern Sie die Farbe oder die Größe des Icons */
 }
-</style>
+</style> -->
