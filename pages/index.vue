@@ -1,122 +1,147 @@
-<template class="bg-danger">
-  <div class="m-4 text-center">
+<template>
+  <div id="body" class="text-center bg-gray-600 p-4 w-full h-full">
     <div class="py-2 mb-6 w-full mx-8 flex items-center">
       <img class="mx-0 mb-2" src="/icons/taskIcon.svg" alt="task" width="30" />
-      <!-- Zentrieren und Schriftgröße erhöhen -->
-      <h1 class="mx-6 mb-2 text-3xl text-center font-bold text-lime-500">Meine Todo-Liste</h1>
-      <!-- Schriftgröße erhöhen und fett machen -->
-    </div>
-    <!-- AddTaskCard dings -->
-    <AddTaskCard @add-todo="addTodo"/>
-    <!-- Überschrift -->
+     </div>
+    <AddTaskCard @add-todo="addTodo" />
     <h2
-      class="mr-2 mt-4 mb-16 text-2xl font-bold text-center text-GREY-700 inline-block"
+      class="mr-2 mt-4 mb-16 text-2xl font-bold text-center text-lime-500 inline-block"
       placeholder="Schreibe hier deine Notiz..."
     >
-      <img src="/icons/filesIcon.svg" alt="files" class="inline-block" />
+      <img src="/icons/coloredFiles.svg" alt="files" class="inline-block" />
       Geplant
     </h2>
-    <!-- Array für die Checkliste -->
-    <div v-if="todos.length >= 1" class="text-2xl bg-gray-100 p-4 rounded-lg">
-      <ul v-for="todo in todos" :key="todo.title" class="mb-4 py-2">
-        <!-- Array wird ausgegeben -->
-        <li class="flex justify-between mb-5 px-5">
-          {{ todo.title }}
-          <img
-            class="mr-12 inline-block cursor-pointer"
-            src="/icons/dateIcon.svg"
-            alt="Date"
-            @click.prevent="setDate(todo)"
+    <div
+      v-if="todos.length >= 1"
+      v-click-away="hideSideBar"
+      class="text-2xl bg-gray-600 p-4 rounded-lg text-justify"
+    >
+      <ul>
+        <li v-for="todo in todos" :key="todo.title">
+          <Sidebar
+            v-show="todo.id === state.activeSideBarId"
+            :id="todo.id"
+            :title="todo.title"
+            :date="todo.todoDate"
+            :note="todo.note"
+            @push-todo="changeTodo"
           />
-
-          <img
-            class="inline-block cursor-pointer"
-            src="/icons/deleteIcon.svg"
-            alt="Delete"
-            @click.prevent="deleteTodo(todo)"
-          />
+          <div
+            class="flex items-center mb-2 px-4 mb-4 py-2 bg-gray-500 p-4 rounded-lg text-justify font-bold text-lime-500 cursor-pointer"
+            @click="state.activeSideBarId = todo.id" 
+          >
+          <img 
+          src="/icons/circleIcon.svg" 
+          alt="lol"
+          class="mr-5"
+          >
+            {{ todo.title }}
+            <img
+              class=" cursor-pointer ml-auto"
+              src="/icons/deleteIcon.svg"
+              alt="Delete"
+              @click="deleteTodo(todo)"
+            />
+            <div v-if="todo.todoDate" class="">
+              {{ todo.todoDate }}
+            </div>
+          </div>
         </li>
-        <textarea
-          id="demo"
-          v-model="todo.note"
-          placeholder="Schreibe hier deine Notiz..."
-          class="p-2 border rounded-md focus:ring focus:ring-lime-500 focus:outline-none mb-2"
-          style="width: 100%"
-        ></textarea>
-        <!--         <img src="/icons/repeatIcon.svg" alt="repeat" class="cursor-pointer" /> -->
-        <button
-          v-if="!todo.buttonClicked && !todo.noteVisible"
-          class="bg-lime-500 text-white py-2 px-4 rounded-md hover:bg-lime-600 transition duration-300 ease-in-out"
-          type="button"
-          @click="showNoteInput(todo)"
-        >
-          Notiz speichern
-        </button>
-        <div v-if="todo.todoDate">
-          <!--Bei mir kam das herraus: Fällig am: Thu Sep 21 2023 02:00:00 GMT+0200 (Mitteleuropäische Sommerzeit)-->
-          <!--Chatgpt hat mir gesagt wenn ich: toLocaleDateString noch hinzufüge, verschwindet das!-->
-          Fällig am: {{ todo.todoDate.toLocaleDateString() }}
-        </div>
       </ul>
+      <div>
+<!--         <div class="text-center">
+          <h2
+            class="mr-2 mt-10 mb-16 text-2xl font-bold text-lime-500 inline-block"
+            placeholder="Schreibe hier deine Notiz..."
+            >
+            <img 
+            src="/icons/finishedIcon.svg" 
+            alt="files" 
+            class="inline-block h-8" />
+            Erledigt
+            </h2>
+        </div>
+        <div class="flex items-center mb-2 px-4 mb-4 py-2 bg-gray-500 p-4 rounded-lg text-justify font-bold text-lime-500 cursor-pointer">
+          <img src="/icons/checkedIcon.svg" alt="checked" class="mr-5">
+          <div class="line-through">
+            Beispiel
+          </div>
+        </div> -->
+      </div>
     </div>
     <div v-else>Es gibt keine Todos</div>
   </div>
 </template>
 
 <script setup lang="ts">
-// Importiert den Type "ToDo" (todo.type.ts)
+import { set } from 'nuxt/dist/app/compat/capi'
 import { ToDo } from '../core/todo.type'
 
-// Das layout wird auf default definiert, warum auch immer.
 definePageMeta({
   layout: 'default',
 })
-// Erstellung des "const" Arrays der einen Objekt(ToDo) enthählt.
+
 const todos: ToDo[] = reactive([
-  // Idee ein Beispiel zu erstellen (mit ChatGPT)
-  { title: 'Beispiel: ', note: '', buttonClicked: false, noteVisible: false },
+  { id: 1, title: 'Beispiel: ', note: '', buttonClicked: false, noteVisible: false },
 ])
 
-const state = reactive({
+const state: { [key: string]: any } = reactive({
   input: '',
   noteText: '',
+  activeSideBarId: undefined,
+  title: '',
+  lastId: 1,
 })
-// Es wird eine Funktion addTodo erstellt die keine Argumente erwartet "()" und kein Rückgabewert gibt "void"
-function addTodo(title: string): void {
-  // Ein neues Objekt wird erstellt, der einen title trägt. Eigenschaften wie Note, buttonClicked und noteVisible werden initalisert.
-  todos.push({ title, note: '', buttonClicked: false, noteVisible: false })
+
+function addTodo(title: string, date: string): void {
+  /* const todoDate: Date | undefined = date !== '' ? new Date(date) : undefined */
+  /* if(date !== '')
+  {
+    todoDate = new Date(date)
+  }else{
+    todoDate = undefined
+  } */
+  todos.push({
+    id: generateID(),
+    title,
+    note: '',
+    buttonClicked: false,
+    noteVisible: false,
+    todoDate: date !== '' ? new Date(date) : undefined,
+  })
 }
-// Funktion, löscht erledigte Aufgaben. (todo: ToDo) Das hiesst das todo, den Typ ToDo hat
+
+function generateID(): number {
+  state.lastId += 1
+  return state.lastId
+}
+
 function deleteTodo(todo: ToDo): void {
-  // indexOf sucht im Array todos nach der Aufgabe todo und definiert das Objekt index.
   const index = todos.indexOf(todo)
-  // splice ist eine Methode um Arrays zu ändern. Es wird genau um 1 verkleinert, also 0. Somit wird das Objekt index gelöscht und es verschwindet.
   todos.splice(index, 1)
 }
-// Die Funktion saveNote speichert die Notiz ab.
+
 function saveNote(): void {
-  // promt = Abfrage (console.ReadLine)
   const note = prompt
-  // hier wird der Inhalt des "noteText" gelöscht.
   state.noteText = ''
-  // nur für die Konsole um zu überprüfen ob es sitmmt.
   console.log('Deine Notiz:', note)
 }
 
-// aktiviert die Sichtbarkeit der Notiz und ändert den status von buttonClicked. --> verstehe ich nicht
-function showNoteInput(todo: ToDo): void {
-  todo.noteVisible = true
-  todo.buttonClicked = true
-}
-// wir erstellen nun eine Funktion setDate um das Fälligkeitsdatum einer Aufgabe setzen zu könne
 function setDate(todo: ToDo) {
-  // Abfrage nach dem Fälligkeitsdatum
   const todoDate = prompt('Geben sie das Fälligkeitsdatum ein (YYYY-MM-DD): )')
-  // ChatGPT, um sicherzustellen das nur wenn das Fälligkeitsdatum güktig ist, bevor es im Objekt todo gehen darf
   if (todoDate) {
     todo.todoDate = new Date(todoDate)
   }
   sortDate(todos)
+}
+
+function formatDate(date = new Date()) {
+  const year = date.toLocaleString('default', {year: 'numeric'});
+  const month = date.toLocaleString('default', {
+    month: '2-digit',
+  });
+  const day = date.toLocaleString('default', {day: '2-digit'});
+  return [year, month, day].join('');
 }
 
 function sortDate(todos: ToDo[]): void {
@@ -133,23 +158,42 @@ function sortDate(todos: ToDo[]): void {
   })
 }
 
-// Funktion, wiederholende Aufgabe
-/* function repetitiveTodo(todo: ToDo): void{
-  var weekly = new Date();
-  weekly.setDate(weekly.getDate() + 7);
+function changeTodo(title: string, id: number, note: string) {
+  console.log('received emit push todo', title, id, note)
+  const index = todos.findIndex((todo) => todo.id === id)
+  todos[index].title = title
+  todos[index].note = note
+}
 
-} */
+function hideSideBar(event: any): void {
+  state.activeSideBarId = undefined
+}
+
+
 </script>
 
 <style>
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 2s, opacity 2s linear;
+}
+
 .input-container {
   display: flex;
-  align-items: center; /* Zentriert die Elemente vertikal */
+  align-items: center; 
 }
 
 .icon {
-  margin-right: 10px; /* Abstand zwischen dem Icon und dem Input-Feld */
-  /* Stilen Sie Ihr SVG-Icon hier nach Bedarf */
-  /* z.B., ändern Sie die Farbe oder die Größe des Icons */
+  margin-right: 10px;
+}
+
+.sepia-filter {
+  filter: sepia(100%) grayscale(100%);
+}
+
+.sepia-filter.active {
+  filter: sepia(0%) grayscale(0%);
 }
 </style>
