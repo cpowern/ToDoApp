@@ -203,4 +203,4 @@ function hideSideBar(event: any): void {
 .sepia-filter.active {
   filter: sepia(0%) grayscale(0%);
 }
-</style>
+</style> -->
