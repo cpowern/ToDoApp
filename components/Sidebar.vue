@@ -16,32 +16,32 @@
       <div
         class="mt-16 text-1xl bg-gray-500 p-2 text-justify ml-3 mr-3 h-28 focus:ring focus:ring-lime-500 focus:outline-none border border-gray-600 hover:border-lime-500 cursor-pointer"
       >
-      <input 
-      id="editDate" 
-      v-model="form.date"
-      type="date"
-      class="w-full"
-      @keypress.prevent.enter="emitAndClearInput()"
-      >
+        <input
+          id="editDate"
+          v-model="form.date"
+          type="date"
+          class="w-full"
+          @keypress.prevent.enter="emitAndClearInput()"
+        />
       </div>
       <div
         class="mt-16 text-1xl bg-gray-500 p-2 text-justify ml-3 mr-3 h-28 focus:ring focus:ring-lime-500 focus:outline-none border border-gray-600 hover:border-lime-500 cursor-pointer"
       >
-        <textarea 
-        id="editNote" 
-        v-model="form.note"
-        name="Notiz" 
-        class="w-full" 
-        placeholder="Notiz"
-        @keypress.prevent.enter="emitAndClearInput()"
+        <textarea
+          id="editNote"
+          v-model="form.note"
+          name="Notiz"
+          class="w-full text-lime-500"
+          placeholder="Notiz"
+          @keypress.prevent.enter="emitAndClearInput()"
         ></textarea>
       </div>
       <div class="flex justify-center items-center h-[220px]">
-        <img 
-        id="sidebarImage" 
-        src="/icons/taskImage.svg" 
-        alt="sidebarImage" 
-        class="h-40 w-26 object-center" 
+        <img
+          id="sidebarImage"
+          src="/icons/taskImage.svg"
+          alt="sidebarImage"
+          class="h-40 w-26 object-center"
         />
       </div>
     </div>
@@ -58,35 +58,39 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  date:{
+  date: {
     type: Date,
     required: false,
   },
   note: {
     type: String,
     required: false,
-  }
+  },
 })
 
 const form = reactive({
   title: props.title,
-  date: props.date,
+  date: props.date !== undefined ? formatDate(props.date) : props.date,
   note: props.note,
 })
 
 const emit = defineEmits(['push-todo'])
 
 function emitAndClearInput() {
-  emit('push-todo', form.title, props.id, form.date, form.note)
+  emit('push-todo', form.title, props.id, form.note, form.date)
   console.log('Test: :', form.date, form.note)
 }
 
+/* onBeforeMount(() => {
+  console.log('Datum 1: ', props.date)
+})
+ */
 </script>
 
 <style>
 #mySideBar {
   color: #84cc16;
-  background-color: #4F5A69;
+  background-color: #4f5a69;
   height: 100vh;
   position: fixed;
   right: 0;
@@ -111,7 +115,7 @@ function emitAndClearInput() {
 }
 
 #main {
-  transition: margin-left .5s;
+  transition: margin-left 0.5s;
   padding: 16px;
 }
 #editNote {
@@ -144,4 +148,3 @@ function emitAndClearInput() {
   align-items: center;
 }
 </style>
-

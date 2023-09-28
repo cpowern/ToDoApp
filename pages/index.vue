@@ -2,7 +2,8 @@
   <div id="body" class="text-center bg-gray-600 p-4 w-full h-full">
     <div class="py-2 mb-6 w-full mx-8 flex items-center">
       <img class="mx-0 mb-2" src="/icons/taskIcon.svg" alt="task" width="30" />
-     </div>
+      <h1 class="mx-6 mb-2 text-3xl text-center font-bold text-lime-500">Meine Todo-Liste</h1>
+    </div>
     <AddTaskCard @add-todo="addTodo" />
     <h2
       class="mr-2 mt-4 mb-16 text-2xl font-bold text-center text-lime-500 inline-block"
@@ -17,7 +18,10 @@
       class="text-2xl bg-gray-600 p-4 rounded-lg text-justify"
     >
       <ul>
-        <li v-for="todo in todos" :key="todo.title">
+        <li v-for="todo in todos.filter((todo) => {
+        return todo.todofinished === false
+      })"
+      :key="todo.title">
           <Sidebar
             v-show="todo.id === state.activeSideBarId"
             :id="todo.id"
@@ -28,48 +32,51 @@
           />
           <div
             class="flex items-center mb-2 px-4 mb-4 py-2 bg-gray-500 p-4 rounded-lg text-justify font-bold text-lime-500 cursor-pointer"
-            @click="state.activeSideBarId = todo.id" 
+            @click="state.activeSideBarId = todo.id"
           >
-          <img 
-          src="/icons/circleIcon.svg" 
-          alt="lol"
-          class="mr-5"
-          >
+            <img src="/icons/circleIcon.svg" alt="lol" class="mr-5" @click="finishTodo(todo)" />
             {{ todo.title }}
             <img
-              class=" cursor-pointer ml-auto"
+              class="cursor-pointer ml-auto order-last"
               src="/icons/deleteIcon.svg"
               alt="Delete"
               @click="deleteTodo(todo)"
             />
-            <div v-if="todo.todoDate" class="">
-              {{ todo.todoDate }}
+            <div v-if="todo.todoDate" class="ml-auto">
+              {{ printDate(todo.todoDate) }}
             </div>
           </div>
         </li>
       </ul>
-      <div>
-<!--         <div class="text-center">
-          <h2
-            class="mr-2 mt-10 mb-16 text-2xl font-bold text-lime-500 inline-block"
-            placeholder="Schreibe hier deine Notiz..."
-            >
-            <img 
-            src="/icons/finishedIcon.svg" 
-            alt="files" 
-            class="inline-block h-8" />
-            Erledigt
-            </h2>
-        </div>
-        <div class="flex items-center mb-2 px-4 mb-4 py-2 bg-gray-500 p-4 rounded-lg text-justify font-bold text-lime-500 cursor-pointer">
-          <img src="/icons/checkedIcon.svg" alt="checked" class="mr-5">
-          <div class="line-through">
-            Beispiel
-          </div>
-        </div> -->
-      </div>
+      <div></div>
     </div>
     <div v-else>Es gibt keine Todos</div>
+    <div class="text-center">
+      <h2
+        class="mr-2 mt-10 mb-16 text-2xl font-bold text-lime-500 inline-block"
+        placeholder="Schreibe hier deine Notiz..."
+      >
+        <img src="/icons/finishedIcon.svg" alt="files" class="inline-block h-8" />
+        Erledigt
+      </h2>
+    </div>
+    <ul
+      v-for="todo in todos.filter((todo) => {
+        return todo.todofinished === true
+      })"
+      :key="todo.title"
+    >
+      <li>
+        <div
+          class="flex items-center mb-2 px-4 mb-4 py-2 bg-gray-500 p-4 rounded-lg text-justify font-bold text-lime-500 cursor-pointer"
+        >
+          <img src="/icons/checkedIcon.svg" alt="checked" class="mr-5" />
+          <div class="line-through">
+            {{ todo.title }}
+          </div>
+        </div>
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -81,8 +88,11 @@ definePageMeta({
   layout: 'default',
 })
 
+/* const deletedTodo = todo.title
+console.log('Finsihed todo: ', deletedTodo) */
+
 const todos: ToDo[] = reactive([
-  { id: 1, title: 'Beispiel: ', note: '', buttonClicked: false, noteVisible: false },
+  { id: 1, title: 'Beispiel: ', note: '', noteVisible: false, todofinished: false },
 ])
 
 const state: { [key: string]: any } = reactive({
@@ -93,22 +103,24 @@ const state: { [key: string]: any } = reactive({
   lastId: 1,
 })
 
+const deletedTodo = state.title
+console.log('Test: ', deletedTodo)
+
 function addTodo(title: string, date: string): void {
-  /* const todoDate: Date | undefined = date !== '' ? new Date(date) : undefined */
-  /* if(date !== '')
-  {
-    todoDate = new Date(date)
-  }else{
-    todoDate = undefined
-  } */
   todos.push({
     id: generateID(),
     title,
     note: '',
-    buttonClicked: false,
     noteVisible: false,
     todoDate: date !== '' ? new Date(date) : undefined,
+    todofinished: false,
   })
+}
+function finishTodo(todo: ToDo) {
+  const index = todos.findIndex((element) => {
+    return element.id === todo.id
+  })
+  todos[index].todofinished = true
 }
 
 function generateID(): number {
@@ -118,7 +130,9 @@ function generateID(): number {
 
 function deleteTodo(todo: ToDo): void {
   const index = todos.indexOf(todo)
+  const deletedTodo = todo.title
   todos.splice(index, 1)
+  console.log('deletedTodo: ', deletedTodo)
 }
 
 function saveNote(): void {
@@ -127,22 +141,13 @@ function saveNote(): void {
   console.log('Deine Notiz:', note)
 }
 
-function setDate(todo: ToDo) {
-  const todoDate = prompt('Geben sie das Fälligkeitsdatum ein (YYYY-MM-DD): )')
-  if (todoDate) {
-    todo.todoDate = new Date(todoDate)
-  }
+onBeforeMount(() => {
   sortDate(todos)
-}
+})
 
-function formatDate(date = new Date()) {
-  const year = date.toLocaleString('default', {year: 'numeric'});
-  const month = date.toLocaleString('default', {
-    month: '2-digit',
-  });
-  const day = date.toLocaleString('default', {day: '2-digit'});
-  return [year, month, day].join('');
-}
+onBeforeUpdate(() => {
+  sortDate(todos)
+})
 
 function sortDate(todos: ToDo[]): void {
   todos.sort((a: ToDo, b: ToDo) => {
@@ -158,31 +163,33 @@ function sortDate(todos: ToDo[]): void {
   })
 }
 
-function changeTodo(title: string, id: number, note: string) {
-  console.log('received emit push todo', title, id, note)
+function changeTodo(title: string, id: number, note: string, date: string) {
+  console.log('received emit push todo', title, id, note, date)
   const index = todos.findIndex((todo) => todo.id === id)
   todos[index].title = title
   todos[index].note = note
+  const newTodoDate = new Date(date)
+  todos[index].todoDate = newTodoDate
 }
 
 function hideSideBar(event: any): void {
   state.activeSideBarId = undefined
+  console.log('Dings')
 }
-
-
 </script>
 
 <style>
-
 .hidden {
   visibility: hidden;
   opacity: 0;
-  transition: visibility 0s 2s, opacity 2s linear;
+  transition:
+    visibility 0s 2s,
+    opacity 2s linear;
 }
 
 .input-container {
   display: flex;
-  align-items: center; 
+  align-items: center;
 }
 
 .icon {
