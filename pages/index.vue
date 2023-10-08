@@ -1,5 +1,8 @@
 <template>
   <div id="body" class="text-center bg-gray-600 p-4 w-full h-full">
+    <button @click="test()">
+      TEST
+    </button>
     <div class="py-2 mb-6 w-full mx-8 flex items-center">
       <img class="mx-0 mb-2" src="/icons/taskIcon.svg" alt="task" width="30" />
       <h1 class="mx-6 mb-2 text-3xl text-center font-bold text-lime-500">Meine Todo-Liste</h1>
@@ -83,6 +86,7 @@
 <script setup lang="ts">
 import { set } from 'nuxt/dist/app/compat/capi'
 import { ToDo } from '../core/todo.type'
+import { MongoClient } from 'mongodb'
 
 definePageMeta({
   layout: 'default',
@@ -105,6 +109,10 @@ const state: { [key: string]: any } = reactive({
 
 const deletedTodo = state.title
 console.log('Test: ', deletedTodo)
+
+function test() {
+  
+}
 
 function addTodo(title: string, date: string): void {
   todos.push({
